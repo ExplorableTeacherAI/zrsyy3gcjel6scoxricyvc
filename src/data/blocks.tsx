@@ -1,6 +1,7 @@
 import { type ReactElement } from "react";
-// import { Block } from "@/components/templates";
-// import { StackLayout, SplitLayout, GridLayout, ScrollytellingLayout, ScrollStep, ScrollVisual } from "@/components/layouts";
+import { Block } from "@/components/templates";
+import { StackLayout } from "@/components/layouts";
+import { EditableH2, EditableParagraph, InlineTooltip } from "@/components/atoms";
 
 // Initialize variables and their colors from this file's variable definitions
 import { useVariableStore, initializeVariableColors } from "@/stores";
@@ -85,5 +86,43 @@ initializeVariableColors(variableDefinitions);
  */
 
 export const blocks: ReactElement[] = [
-    // Start adding your blocks here!
+    <StackLayout key="layout-history-title" maxWidth="xl">
+        <Block id="block-history-title" padding="md">
+            <EditableH2 id="h2-history-title" blockId="block-history-title">
+                The Dawn of Mathematics
+            </EditableH2>
+        </Block>
+    </StackLayout>,
+
+    <StackLayout key="layout-history-para" maxWidth="xl">
+        <Block id="block-history-para" padding="sm">
+            <EditableParagraph id="para-history" blockId="block-history-para">
+                Long before calculators or computers, ancient civilizations were already wrestling with numbers and shapes. The{" "}
+                <InlineTooltip
+                    id="tooltip-egyptians"
+                    tooltip="An ancient civilization along the Nile River (c. 3100–30 BCE) known for pyramids and hieroglyphic writing."
+                    color="#f97316"
+                >
+                    Egyptians
+                </InlineTooltip>
+                {" "}used geometry to resurvey their farmland after the Nile's annual floods, while the{" "}
+                <InlineTooltip
+                    id="tooltip-babylonians"
+                    tooltip="An ancient Mesopotamian civilization (c. 1894–539 BCE) famous for developing a base-60 number system still used in telling time today."
+                    color="#3b82f6"
+                >
+                    Babylonians
+                </InlineTooltip>
+                {" "}developed a sophisticated base-60 number system — which is why we still have 60 seconds in a minute and 360 degrees in a circle. The{" "}
+                <InlineTooltip
+                    id="tooltip-greeks"
+                    tooltip="Ancient Greek mathematicians (c. 600 BCE–300 CE) pioneered logical proofs and abstract thinking in mathematics."
+                    color="#8b5cf6"
+                >
+                    Greeks
+                </InlineTooltip>
+                {" "}transformed mathematics from a practical tool into an art of pure reasoning — Euclid's proof that there are infinitely many prime numbers is still taught today, over 2,300 years later.
+            </EditableParagraph>
+        </Block>
+    </StackLayout>,
 ];
