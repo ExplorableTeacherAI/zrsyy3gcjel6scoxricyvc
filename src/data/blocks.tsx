@@ -132,7 +132,12 @@ export const blocks: ReactElement[] = [
             <EditableH3 id="h3-euclid-title" blockId="block-1772532256404">
                 Euclid's Proof: Infinitely Many Primes
             </EditableH3>
-            <EditableParagraph id="para-euclid-intro" blockId="block-1772532256404">
+        </Block>
+    </StackLayout>,
+
+    <StackLayout key="layout-euclid-intro" maxWidth="2xl">
+        <Block id="block-euclid-intro" padding="sm">
+            <EditableParagraph id="para-euclid-intro" blockId="block-euclid-intro">
                 Around 300 BCE, Euclid crafted one of the most elegant proofs in all of mathematics. He showed that no matter how many prime numbers you know, there must always be at least one more. Scroll through to see how the argument unfolds.
             </EditableParagraph>
         </Block>
