@@ -2,8 +2,8 @@ import { useVar } from "@/stores";
 import { motion, AnimatePresence } from "framer-motion";
 
 /**
- * EuclidProofVisual - Number Line visualization of Euclid's proof
- * Shows that multiples of 2, 3, and 5 never land on 31.
+ * EuclidProofVisual - Factor Tree visualization of Euclid's proof
+ * Shows that 31 cannot be factored by 2, 3, or 5.
  */
 export const EuclidProofVisual = () => {
     const step = useVar('euclidStep', 0) as number;
@@ -11,17 +11,13 @@ export const EuclidProofVisual = () => {
     const primes = [2, 3, 5];
     const product = 30;
     const target = 31;
-    const maxNum = 35;
 
     // Get color for each prime
     const getPrimeColor = (p: number) => {
-        if (p === 2) return { bg: '#8b5cf6', light: '#ede9fe' }; // violet
-        if (p === 3) return { bg: '#3b82f6', light: '#dbeafe' }; // blue
-        return { bg: '#f97316', light: '#ffedd5' }; // orange
+        if (p === 2) return '#8b5cf6'; // violet
+        if (p === 3) return '#3b82f6'; // blue
+        return '#f97316'; // orange
     };
-
-    // Check if number is a multiple of a prime
-    const isMultipleOf = (num: number, prime: number) => num % prime === 0 && num > 0;
 
     return (
         <div className="w-full h-full min-h-[400px] flex flex-col items-center justify-center bg-white rounded-xl p-6">
@@ -43,13 +39,13 @@ export const EuclidProofVisual = () => {
                                     animate={{ scale: 1 }}
                                     transition={{ delay: i * 0.2 }}
                                     className="w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold shadow-lg text-white"
-                                    style={{ backgroundColor: getPrimeColor(p).bg }}
+                                    style={{ backgroundColor: getPrimeColor(p) }}
                                 >
                                     {p}
                                 </motion.div>
                             ))}
                         </div>
-                        <div className="text-slate-500">Each prime can only "step" to its own multiples</div>
+                        <div className="text-slate-500">We'll try to use these to factor numbers</div>
                     </motion.div>
                 )}
 
@@ -59,7 +55,7 @@ export const EuclidProofVisual = () => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -20 }}
-                        className="text-center w-full"
+                        className="text-center"
                     >
                         <div className="text-lg text-slate-600 mb-4">Multiply them together:</div>
                         <div className="flex items-center gap-3 justify-center text-2xl mb-6">
@@ -70,7 +66,7 @@ export const EuclidProofVisual = () => {
                                         animate={{ scale: 1 }}
                                         transition={{ delay: i * 0.15 }}
                                         className="w-12 h-12 rounded-full text-white flex items-center justify-center font-bold shadow-md"
-                                        style={{ backgroundColor: getPrimeColor(p).bg }}
+                                        style={{ backgroundColor: getPrimeColor(p) }}
                                     >
                                         {p}
                                     </motion.span>
@@ -97,24 +93,59 @@ export const EuclidProofVisual = () => {
                             </motion.span>
                         </div>
 
-                        {/* Number line showing 30 is reachable */}
+                        {/* Factor tree for 30 */}
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.9 }}
-                            className="mt-4"
+                            className="flex flex-col items-center mt-4"
                         >
-                            <div className="text-sm text-slate-500 mb-3">30 is a multiple of all three:</div>
-                            <div className="flex justify-center gap-2">
-                                {[2, 3, 5].map(p => (
-                                    <div key={p} className="flex items-center gap-1 px-3 py-1 rounded-full text-sm text-white" style={{ backgroundColor: getPrimeColor(p).bg }}>
-                                        <span>{p}</span>
-                                        <span>→</span>
-                                        <span>30</span>
-                                        <span>✓</span>
-                                    </div>
-                                ))}
-                            </div>
+                            <div className="text-sm text-slate-500 mb-3">30 breaks down nicely:</div>
+
+                            {/* Tree visualization */}
+                            <svg width="200" height="140" className="overflow-visible">
+                                {/* 30 at top */}
+                                <motion.g initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1 }}>
+                                    <circle cx="100" cy="25" r="22" fill="#2563eb" />
+                                    <text x="100" y="31" textAnchor="middle" fill="white" fontWeight="bold" fontSize="14">30</text>
+                                </motion.g>
+
+                                {/* Branches to 2 and 15 */}
+                                <motion.line x1="85" y1="45" x2="50" y2="70" stroke="#94a3b8" strokeWidth="2"
+                                    initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ delay: 1.2 }} />
+                                <motion.line x1="115" y1="45" x2="150" y2="70" stroke="#94a3b8" strokeWidth="2"
+                                    initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ delay: 1.2 }} />
+
+                                {/* 2 */}
+                                <motion.g initial={{ opacity: 0, scale: 0 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 1.4 }}>
+                                    <circle cx="50" cy="85" r="18" fill="#8b5cf6" />
+                                    <text x="50" y="90" textAnchor="middle" fill="white" fontWeight="bold" fontSize="12">2</text>
+                                </motion.g>
+
+                                {/* 15 */}
+                                <motion.g initial={{ opacity: 0, scale: 0 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 1.4 }}>
+                                    <circle cx="150" cy="85" r="18" fill="#cbd5e1" />
+                                    <text x="150" y="90" textAnchor="middle" fill="#475569" fontWeight="bold" fontSize="12">15</text>
+                                </motion.g>
+
+                                {/* Branches from 15 to 3 and 5 */}
+                                <motion.line x1="138" y1="100" x2="120" y2="120" stroke="#94a3b8" strokeWidth="2"
+                                    initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ delay: 1.6 }} />
+                                <motion.line x1="162" y1="100" x2="180" y2="120" stroke="#94a3b8" strokeWidth="2"
+                                    initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ delay: 1.6 }} />
+
+                                {/* 3 */}
+                                <motion.g initial={{ opacity: 0, scale: 0 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 1.8 }}>
+                                    <circle cx="120" cy="130" r="15" fill="#3b82f6" />
+                                    <text x="120" y="135" textAnchor="middle" fill="white" fontWeight="bold" fontSize="11">3</text>
+                                </motion.g>
+
+                                {/* 5 */}
+                                <motion.g initial={{ opacity: 0, scale: 0 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 1.8 }}>
+                                    <circle cx="180" cy="130" r="15" fill="#f97316" />
+                                    <text x="180" y="135" textAnchor="middle" fill="white" fontWeight="bold" fontSize="11">5</text>
+                                </motion.g>
+                            </svg>
                         </motion.div>
                     </motion.div>
                 )}
@@ -125,9 +156,9 @@ export const EuclidProofVisual = () => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -20 }}
-                        className="text-center w-full"
+                        className="text-center"
                     >
-                        <div className="text-lg text-slate-600 mb-4">Add 1 — where does 31 land?</div>
+                        <div className="text-lg text-slate-600 mb-4">Add 1 — can we factor 31?</div>
                         <div className="flex items-center gap-4 justify-center text-2xl mb-6">
                             <span className="w-14 h-14 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold shadow-lg">
                                 {product}
@@ -152,34 +183,19 @@ export const EuclidProofVisual = () => {
                                 initial={{ scale: 0, rotate: -180 }}
                                 animate={{ scale: 1, rotate: 0 }}
                                 transition={{ delay: 0.7, type: "spring" }}
-                                className="w-16 h-16 rounded-xl bg-gradient-to-br from-orange-400 to-orange-600 text-white flex items-center justify-center font-bold text-2xl shadow-xl"
+                                className="w-16 h-16 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 text-white flex items-center justify-center font-bold text-2xl shadow-xl"
                             >
                                 {target}
                             </motion.span>
                         </div>
 
-                        {/* Mini number line showing 30 → 31 */}
                         <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             transition={{ delay: 1 }}
-                            className="flex items-center justify-center gap-2 mt-4"
+                            className="text-slate-500 mt-4"
                         >
-                            <div className="w-12 h-12 rounded-lg bg-blue-100 border-2 border-blue-400 flex items-center justify-center font-bold text-blue-600">
-                                30
-                            </div>
-                            <div className="text-2xl text-slate-400">→</div>
-                            <div className="w-14 h-14 rounded-lg bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center font-bold text-white text-lg shadow-lg">
-                                31
-                            </div>
-                        </motion.div>
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ delay: 1.3 }}
-                            className="text-slate-500 mt-3"
-                        >
-                            Can any prime reach 31?
+                            Let's try to build a factor tree for 31...
                         </motion.div>
                     </motion.div>
                 )}
@@ -190,90 +206,97 @@ export const EuclidProofVisual = () => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -20 }}
-                        className="text-center w-full"
+                        className="text-center"
                     >
-                        <div className="text-lg text-slate-600 mb-4">Stepping along the number line:</div>
+                        <div className="text-lg text-slate-600 mb-4">Trying to factor 31:</div>
 
-                        {/* Number line visualization */}
-                        <div className="relative w-full max-w-lg mx-auto">
-                            {/* Three rows for each prime */}
-                            {primes.map((prime, primeIdx) => (
-                                <motion.div
-                                    key={prime}
-                                    initial={{ opacity: 0, x: -20 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    transition={{ delay: primeIdx * 0.2 }}
-                                    className="mb-4"
-                                >
-                                    <div className="flex items-center gap-2 mb-2">
-                                        <div
-                                            className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-white"
-                                            style={{ backgroundColor: getPrimeColor(prime).bg }}
+                        {/* Factor tree with failed attempts */}
+                        <svg width="280" height="220" className="overflow-visible mx-auto">
+                            {/* 31 at top */}
+                            <motion.g initial={{ opacity: 0, scale: 0 }} animate={{ opacity: 1, scale: 1 }}>
+                                <circle cx="140" cy="30" r="28" fill="url(#orangeGradient)" />
+                                <text x="140" y="37" textAnchor="middle" fill="white" fontWeight="bold" fontSize="18">31</text>
+                            </motion.g>
+
+                            {/* Gradient definition */}
+                            <defs>
+                                <linearGradient id="orangeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stopColor="#fb923c" />
+                                    <stop offset="100%" stopColor="#ea580c" />
+                                </linearGradient>
+                            </defs>
+
+                            {/* Three branches for attempts */}
+                            {primes.map((prime, i) => {
+                                const xPos = 70 + i * 70;
+                                const startX = 140 + (i - 1) * 30;
+
+                                return (
+                                    <g key={prime}>
+                                        {/* Branch line */}
+                                        <motion.line
+                                            x1={startX} y1="55" x2={xPos} y2="90"
+                                            stroke="#94a3b8" strokeWidth="2" strokeDasharray="4,4"
+                                            initial={{ pathLength: 0 }}
+                                            animate={{ pathLength: 1 }}
+                                            transition={{ delay: 0.3 + i * 0.2 }}
+                                        />
+
+                                        {/* Prime circle */}
+                                        <motion.g
+                                            initial={{ opacity: 0, scale: 0 }}
+                                            animate={{ opacity: 1, scale: 1 }}
+                                            transition={{ delay: 0.5 + i * 0.2 }}
                                         >
-                                            {prime}
-                                        </div>
-                                        <span className="text-sm text-slate-500">steps by {prime}s:</span>
-                                    </div>
+                                            <circle cx={xPos} cy="110" r="20" fill={getPrimeColor(prime)} />
+                                            <text x={xPos} y="116" textAnchor="middle" fill="white" fontWeight="bold" fontSize="14">{prime}</text>
+                                        </motion.g>
 
-                                    {/* Number line for this prime */}
-                                    <div className="relative h-10 bg-slate-100 rounded-full overflow-hidden">
-                                        {/* Multiples as stepping stones */}
-                                        <div className="absolute inset-0 flex items-center">
-                                            {Array.from({ length: Math.floor(maxNum / prime) }, (_, i) => (i + 1) * prime).map((mult, i) => {
-                                                const position = (mult / maxNum) * 100;
-                                                return (
-                                                    <motion.div
-                                                        key={mult}
-                                                        initial={{ scale: 0 }}
-                                                        animate={{ scale: 1 }}
-                                                        transition={{ delay: primeIdx * 0.2 + i * 0.05 }}
-                                                        className="absolute w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shadow-sm"
-                                                        style={{
-                                                            left: `calc(${position}% - 16px)`,
-                                                            backgroundColor: getPrimeColor(prime).bg,
-                                                        }}
-                                                    >
-                                                        {mult}
-                                                    </motion.div>
-                                                );
-                                            })}
+                                        {/* Division result */}
+                                        <motion.text
+                                            x={xPos} y="145"
+                                            textAnchor="middle"
+                                            fill="#64748b"
+                                            fontSize="11"
+                                            initial={{ opacity: 0 }}
+                                            animate={{ opacity: 1 }}
+                                            transition={{ delay: 0.7 + i * 0.2 }}
+                                        >
+                                            31÷{prime}
+                                        </motion.text>
+                                        <motion.text
+                                            x={xPos} y="160"
+                                            textAnchor="middle"
+                                            fill="#64748b"
+                                            fontSize="11"
+                                            initial={{ opacity: 0 }}
+                                            animate={{ opacity: 1 }}
+                                            transition={{ delay: 0.7 + i * 0.2 }}
+                                        >
+                                            = {(31 / prime).toFixed(1)}...
+                                        </motion.text>
 
-                                            {/* Target 31 marker */}
-                                            <motion.div
-                                                initial={{ scale: 0 }}
-                                                animate={{ scale: 1 }}
-                                                transition={{ delay: primeIdx * 0.2 + 0.5 }}
-                                                className="absolute w-10 h-10 -mt-1 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-xs font-bold text-white shadow-lg border-2 border-white"
-                                                style={{ left: `calc(${(31 / maxNum) * 100}% - 20px)` }}
-                                            >
-                                                31
-                                            </motion.div>
-                                        </div>
-                                    </div>
-
-                                    {/* Miss indicator */}
-                                    <motion.div
-                                        initial={{ opacity: 0 }}
-                                        animate={{ opacity: 1 }}
-                                        transition={{ delay: primeIdx * 0.2 + 0.7 }}
-                                        className="flex items-center justify-end gap-2 mt-1 text-sm"
-                                    >
-                                        <span className="text-slate-500">
-                                            {Math.floor(31 / prime) * prime} → <span className="text-orange-500 font-semibold">31</span> → {Math.ceil(31 / prime) * prime}
-                                        </span>
-                                        <span className="text-red-500">✗ misses!</span>
-                                    </motion.div>
-                                </motion.div>
-                            ))}
-                        </div>
+                                        {/* X mark */}
+                                        <motion.g
+                                            initial={{ opacity: 0, scale: 0 }}
+                                            animate={{ opacity: 1, scale: 1 }}
+                                            transition={{ delay: 0.9 + i * 0.2 }}
+                                        >
+                                            <circle cx={xPos} cy="190" r="16" fill="#fee2e2" stroke="#f87171" strokeWidth="2" />
+                                            <text x={xPos} y="196" textAnchor="middle" fill="#dc2626" fontWeight="bold" fontSize="16">✗</text>
+                                        </motion.g>
+                                    </g>
+                                );
+                            })}
+                        </svg>
 
                         <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
-                            transition={{ delay: 1 }}
-                            className="mt-4 text-slate-600 font-medium"
+                            transition={{ delay: 1.5 }}
+                            className="mt-2 text-slate-600 font-medium"
                         >
-                            31 falls between the stepping stones — unreachable!
+                            Every branch leads to a dead end!
                         </motion.div>
                     </motion.div>
                 )}
@@ -286,37 +309,69 @@ export const EuclidProofVisual = () => {
                         exit={{ opacity: 0, y: -20 }}
                         className="text-center"
                     >
+                        {/* Successful tree showing 31 = 1 × 31 only */}
+                        <svg width="200" height="120" className="overflow-visible mx-auto mb-4">
+                            {/* 31 at top - now green */}
+                            <motion.g initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 200 }}>
+                                <circle cx="100" cy="35" r="30" fill="url(#greenGradient)" stroke="#34d399" strokeWidth="3" />
+                                <text x="100" y="43" textAnchor="middle" fill="white" fontWeight="bold" fontSize="20">31</text>
+                            </motion.g>
+
+                            <defs>
+                                <linearGradient id="greenGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stopColor="#34d399" />
+                                    <stop offset="100%" stopColor="#059669" />
+                                </linearGradient>
+                            </defs>
+
+                            {/* Only factors: 1 and 31 */}
+                            <motion.line x1="80" y1="62" x2="55" y2="85" stroke="#94a3b8" strokeWidth="2"
+                                initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ delay: 0.3 }} />
+                            <motion.line x1="120" y1="62" x2="145" y2="85" stroke="#94a3b8" strokeWidth="2"
+                                initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ delay: 0.3 }} />
+
+                            <motion.g initial={{ opacity: 0, scale: 0 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.5 }}>
+                                <circle cx="55" cy="100" r="18" fill="#d1fae5" stroke="#10b981" strokeWidth="2" />
+                                <text x="55" y="106" textAnchor="middle" fill="#059669" fontWeight="bold" fontSize="14">1</text>
+                            </motion.g>
+
+                            <motion.g initial={{ opacity: 0, scale: 0 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.5 }}>
+                                <circle cx="145" cy="100" r="18" fill="#10b981" />
+                                <text x="145" y="106" textAnchor="middle" fill="white" fontWeight="bold" fontSize="12">31</text>
+                            </motion.g>
+                        </svg>
+
                         <motion.div
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            transition={{ type: "spring", stiffness: 200 }}
-                            className="w-24 h-24 mx-auto rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 text-white flex items-center justify-center text-4xl font-bold shadow-xl mb-6 ring-4 ring-offset-2 ring-emerald-400"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 0.7 }}
+                            className="text-sm text-slate-500 mb-4"
                         >
-                            31
+                            Only factors: 1 × 31
                         </motion.div>
 
                         <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
-                            transition={{ delay: 0.3 }}
+                            transition={{ delay: 0.9 }}
                             className="text-xl text-emerald-600 font-semibold mb-2"
                         >
-                            31 is unreachable — it's a new prime!
+                            31 is prime — unfactorable!
                         </motion.div>
 
                         <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
-                            transition={{ delay: 0.6 }}
+                            transition={{ delay: 1.1 }}
                             className="text-slate-500 max-w-sm mx-auto"
                         >
-                            No stepping pattern of 2, 3, or 5 ever lands on 31. This means 31 must be prime — a new prime not in our original list!
+                            The factor tree has no real branches. 31 is a new prime not in our original list — proving there are always more primes!
                         </motion.div>
 
                         <motion.div
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 1 }}
+                            transition={{ delay: 1.4 }}
                             className="mt-6 text-4xl"
                         >
                             ∞
