@@ -1,6 +1,5 @@
 import { useVar } from "@/stores";
 import { motion, AnimatePresence } from "framer-motion";
-import { useEffect, useState } from "react";
 
 /**
  * EuclidProofVisual - Factor Tree visualization of Euclid's proof
@@ -8,34 +7,10 @@ import { useEffect, useState } from "react";
  */
 export const EuclidProofVisual = () => {
     const step = useVar('euclidStep', 0) as number;
-    const [currentAttempt, setCurrentAttempt] = useState(0);
-    const [showFailure, setShowFailure] = useState(false);
 
     const primes = [2, 3, 5];
     const product = 30;
     const target = 31;
-
-    // Animate through factor attempts in step 3
-    useEffect(() => {
-        if (step === 3) {
-            setCurrentAttempt(0);
-            setShowFailure(false);
-
-            const animateAttempts = async () => {
-                for (let i = 0; i < primes.length; i++) {
-                    setCurrentAttempt(i);
-                    setShowFailure(false);
-                    await new Promise(resolve => setTimeout(resolve, 600));
-                    setShowFailure(true);
-                    await new Promise(resolve => setTimeout(resolve, 1000));
-                }
-            };
-            animateAttempts();
-        } else {
-            setCurrentAttempt(0);
-            setShowFailure(false);
-        }
-    }, [step]);
 
     // Factor tree node component
     const TreeNode = ({
@@ -74,7 +49,7 @@ export const EuclidProofVisual = () => {
     );
 
     return (
-        <div className="w-full h-full min-h-[400px] flex flex-col items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl p-6">
+        <div className="w-full h-full min-h-[400px] flex flex-col items-center justify-center bg-white rounded-xl p-6">
             <AnimatePresence mode="wait">
                 {step === 0 && (
                     <motion.div
@@ -251,23 +226,16 @@ export const EuclidProofVisual = () => {
                         <div className="flex flex-col items-center">
                             <TreeNode value={31} color="bg-gradient-to-br from-orange-400 to-orange-600" textColor="text-white" size="large" />
 
-                            <motion.div
-                                initial={{ scaleY: 0 }}
-                                animate={{ scaleY: 1 }}
-                                className="w-0.5 h-10 bg-slate-300 origin-top mt-2"
-                            />
+                            <div className="w-0.5 h-10 bg-slate-300 mt-2" />
 
-                            {/* Attempt branches */}
-                            <div className="flex gap-16 items-start">
+                            {/* All failed attempts shown together */}
+                            <div className="flex gap-12 items-start">
                                 {primes.map((p, i) => (
                                     <motion.div
                                         key={p}
                                         initial={{ opacity: 0, y: -10 }}
-                                        animate={{
-                                            opacity: currentAttempt >= i ? 1 : 0.3,
-                                            y: 0
-                                        }}
-                                        transition={{ delay: i * 0.1 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: i * 0.15 }}
                                         className="flex flex-col items-center"
                                     >
                                         <div className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold shadow-md text-white ${
@@ -276,40 +244,25 @@ export const EuclidProofVisual = () => {
                                             {p}
                                         </div>
 
-                                        {currentAttempt === i && (
-                                            <motion.div
-                                                initial={{ opacity: 0 }}
-                                                animate={{ opacity: 1 }}
-                                                className="mt-2 text-sm text-slate-500"
-                                            >
-                                                31 ÷ {p} = {(31 / p).toFixed(2)}...
-                                            </motion.div>
-                                        )}
+                                        <motion.div
+                                            initial={{ opacity: 0 }}
+                                            animate={{ opacity: 1 }}
+                                            transition={{ delay: i * 0.15 + 0.2 }}
+                                            className="mt-2 text-sm text-slate-500"
+                                        >
+                                            31 ÷ {p} = {(31 / p).toFixed(2)}
+                                        </motion.div>
 
-                                        {currentAttempt === i && showFailure && (
-                                            <motion.div
-                                                initial={{ scale: 0 }}
-                                                animate={{ scale: 1 }}
-                                                className="mt-2"
-                                            >
-                                                <div className="w-10 h-10 rounded-full bg-red-100 border-2 border-red-400 flex items-center justify-center">
-                                                    <span className="text-red-500 text-xl">✗</span>
-                                                </div>
-                                                <div className="text-xs text-red-500 mt-1">Not whole!</div>
-                                            </motion.div>
-                                        )}
-
-                                        {currentAttempt > i && (
-                                            <motion.div
-                                                initial={{ scale: 0 }}
-                                                animate={{ scale: 1 }}
-                                                className="mt-2"
-                                            >
-                                                <div className="w-10 h-10 rounded-full bg-red-100 border-2 border-red-400 flex items-center justify-center">
-                                                    <span className="text-red-500 text-xl">✗</span>
-                                                </div>
-                                            </motion.div>
-                                        )}
+                                        <motion.div
+                                            initial={{ scale: 0 }}
+                                            animate={{ scale: 1 }}
+                                            transition={{ delay: i * 0.15 + 0.4 }}
+                                            className="mt-2"
+                                        >
+                                            <div className="w-10 h-10 rounded-full bg-red-100 border-2 border-red-400 flex items-center justify-center">
+                                                <span className="text-red-500 text-xl">✗</span>
+                                            </div>
+                                        </motion.div>
                                     </motion.div>
                                 ))}
                             </div>
@@ -317,8 +270,8 @@ export const EuclidProofVisual = () => {
 
                         <motion.div
                             initial={{ opacity: 0 }}
-                            animate={{ opacity: currentAttempt >= 2 && showFailure ? 1 : 0 }}
-                            transition={{ delay: 0.5 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 0.8 }}
                             className="mt-6 text-slate-600 font-medium"
                         >
                             All branches lead to dead ends!
