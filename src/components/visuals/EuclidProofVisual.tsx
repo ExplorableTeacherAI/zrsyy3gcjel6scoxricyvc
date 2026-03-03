@@ -3,126 +3,75 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
 
 /**
- * EuclidProofVisual - Number Line visualization of Euclid's proof
- * Shows animated jumps that never land on 31.
+ * EuclidProofVisual - Factor Tree visualization of Euclid's proof
+ * Shows animated attempts to factor 31 that all fail.
  */
 export const EuclidProofVisual = () => {
     const step = useVar('euclidStep', 0) as number;
-    const [jumpPositions, setJumpPositions] = useState<number[]>([]);
-    const [currentPrime, setCurrentPrime] = useState<number | null>(null);
+    const [currentAttempt, setCurrentAttempt] = useState(0);
+    const [showFailure, setShowFailure] = useState(false);
 
     const primes = [2, 3, 5];
     const product = 30;
     const target = 31;
-    const maxNum = 35;
 
-    // Generate jump positions for a given prime
+    // Animate through factor attempts in step 3
     useEffect(() => {
         if (step === 3) {
-            // Animate through each prime
-            const animateJumps = async () => {
+            setCurrentAttempt(0);
+            setShowFailure(false);
+
+            const animateAttempts = async () => {
                 for (let i = 0; i < primes.length; i++) {
-                    const prime = primes[i];
-                    setCurrentPrime(prime);
-                    const positions: number[] = [];
-                    for (let j = prime; j <= maxNum; j += prime) {
-                        positions.push(j);
-                    }
-                    setJumpPositions([]);
-                    // Animate positions one by one
-                    for (let k = 0; k < positions.length; k++) {
-                        await new Promise(resolve => setTimeout(resolve, 150));
-                        setJumpPositions(prev => [...prev, positions[k]]);
-                    }
-                    await new Promise(resolve => setTimeout(resolve, 800));
+                    setCurrentAttempt(i);
+                    setShowFailure(false);
+                    await new Promise(resolve => setTimeout(resolve, 600));
+                    setShowFailure(true);
+                    await new Promise(resolve => setTimeout(resolve, 1000));
                 }
             };
-            animateJumps();
+            animateAttempts();
         } else {
-            setJumpPositions([]);
-            setCurrentPrime(null);
+            setCurrentAttempt(0);
+            setShowFailure(false);
         }
     }, [step]);
 
-    // Number line component
-    const NumberLine = ({ highlightTarget = false, showJumps = false, showMultiples = false }: {
-        highlightTarget?: boolean;
-        showJumps?: boolean;
-        showMultiples?: boolean;
+    // Factor tree node component
+    const TreeNode = ({
+        value,
+        color = "bg-slate-200",
+        textColor = "text-slate-700",
+        size = "normal",
+        highlight = false
+    }: {
+        value: string | number;
+        color?: string;
+        textColor?: string;
+        size?: "small" | "normal" | "large";
+        highlight?: boolean;
     }) => {
-        const numbers = Array.from({ length: maxNum }, (_, i) => i + 1);
+        const sizeClasses = {
+            small: "w-10 h-10 text-sm",
+            normal: "w-14 h-14 text-lg",
+            large: "w-20 h-20 text-2xl"
+        };
 
         return (
-            <div className="w-full overflow-x-auto pb-4">
-                <div className="relative min-w-[600px] h-32">
-                    {/* Number line base */}
-                    <div className="absolute bottom-8 left-4 right-4 h-1 bg-slate-300 rounded-full" />
-
-                    {/* Tick marks and numbers */}
-                    <div className="absolute bottom-0 left-4 right-4 flex justify-between">
-                        {numbers.filter(n => n % 5 === 0 || n === 1 || n === 31).map(num => {
-                            const position = ((num - 1) / (maxNum - 1)) * 100;
-                            const isTarget = num === target;
-                            const isProduct = num === product;
-                            const isJumpLanding = showJumps && jumpPositions.includes(num);
-
-                            return (
-                                <div
-                                    key={num}
-                                    className="absolute flex flex-col items-center"
-                                    style={{ left: `${position}%`, transform: 'translateX(-50%)' }}
-                                >
-                                    {/* Jump landing indicator */}
-                                    {isJumpLanding && (
-                                        <motion.div
-                                            initial={{ scale: 0, y: -20 }}
-                                            animate={{ scale: 1, y: 0 }}
-                                            className="absolute -top-12 w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold"
-                                            style={{ backgroundColor: currentPrime === 2 ? '#8b5cf6' : currentPrime === 3 ? '#3b82f6' : '#f97316' }}
-                                        >
-                                            {currentPrime}
-                                        </motion.div>
-                                    )}
-
-                                    {/* Tick mark */}
-                                    <div
-                                        className={`w-0.5 h-3 ${isTarget && highlightTarget ? 'bg-emerald-500 h-5' : isProduct ? 'bg-blue-500 h-4' : 'bg-slate-400'}`}
-                                    />
-
-                                    {/* Number label */}
-                                    <span
-                                        className={`text-sm mt-1 font-medium ${
-                                            isTarget && highlightTarget
-                                                ? 'text-emerald-600 text-lg font-bold'
-                                                : isProduct
-                                                    ? 'text-blue-600 font-semibold'
-                                                    : 'text-slate-500'
-                                        }`}
-                                    >
-                                        {num}
-                                    </span>
-
-                                    {/* Target marker */}
-                                    {isTarget && highlightTarget && (
-                                        <motion.div
-                                            initial={{ scale: 0 }}
-                                            animate={{ scale: 1 }}
-                                            className="absolute -top-16"
-                                        >
-                                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white font-bold shadow-lg">
-                                                31
-                                            </div>
-                                            <div className="w-0 h-0 border-l-4 border-r-4 border-t-8 border-transparent border-t-orange-500 mx-auto" />
-                                        </motion.div>
-                                    )}
-                                </div>
-                            );
-                        })}
-                    </div>
-                </div>
+            <div className={`
+                ${sizeClasses[size]} rounded-full ${color} ${textColor}
+                flex items-center justify-center font-bold shadow-md
+                ${highlight ? 'ring-4 ring-offset-2 ring-emerald-400' : ''}
+            `}>
+                {value}
             </div>
         );
     };
+
+    // Branch line component
+    const Branch = ({ failed = false }: { failed?: boolean }) => (
+        <div className={`w-0.5 h-8 ${failed ? 'bg-red-300' : 'bg-slate-300'}`} />
+    );
 
     return (
         <div className="w-full h-full min-h-[400px] flex flex-col items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl p-6">
@@ -133,7 +82,7 @@ export const EuclidProofVisual = () => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -20 }}
-                        className="text-center w-full"
+                        className="text-center"
                     >
                         <div className="text-lg text-slate-600 mb-6">Our list of primes:</div>
                         <div className="flex gap-4 justify-center mb-8">
@@ -151,7 +100,7 @@ export const EuclidProofVisual = () => {
                                 </motion.div>
                             ))}
                         </div>
-                        <div className="text-slate-500">These can "jump" along the number line</div>
+                        <div className="text-slate-500">We'll try to use these to factor our number</div>
                     </motion.div>
                 )}
 
@@ -161,10 +110,10 @@ export const EuclidProofVisual = () => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -20 }}
-                        className="text-center w-full"
+                        className="text-center"
                     >
                         <div className="text-lg text-slate-600 mb-4">Multiply them together:</div>
-                        <div className="flex items-center gap-3 justify-center text-2xl mb-6">
+                        <div className="flex items-center gap-3 justify-center text-2xl mb-8">
                             {primes.map((p, i) => (
                                 <span key={p} className="flex items-center gap-3">
                                     <motion.span
@@ -199,7 +148,33 @@ export const EuclidProofVisual = () => {
                                 {product}
                             </motion.span>
                         </div>
-                        <NumberLine />
+
+                        {/* Factor tree for 30 */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 1 }}
+                            className="flex flex-col items-center"
+                        >
+                            <div className="text-sm text-slate-500 mb-3">30 can be factored:</div>
+                            <TreeNode value={30} color="bg-blue-500" textColor="text-white" />
+                            <div className="flex gap-12 mt-2">
+                                <Branch />
+                                <Branch />
+                            </div>
+                            <div className="flex gap-8">
+                                <TreeNode value={2} color="bg-violet-500" textColor="text-white" size="small" />
+                                <TreeNode value={15} color="bg-slate-300" textColor="text-slate-700" size="small" />
+                            </div>
+                            <div className="ml-16 flex gap-8 mt-2">
+                                <Branch />
+                                <Branch />
+                            </div>
+                            <div className="ml-16 flex gap-4">
+                                <TreeNode value={3} color="bg-blue-500" textColor="text-white" size="small" />
+                                <TreeNode value={5} color="bg-orange-500" textColor="text-white" size="small" />
+                            </div>
+                        </motion.div>
                     </motion.div>
                 )}
 
@@ -209,10 +184,10 @@ export const EuclidProofVisual = () => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -20 }}
-                        className="text-center w-full"
+                        className="text-center"
                     >
-                        <div className="text-lg text-slate-600 mb-4">Add 1 to land on our target:</div>
-                        <div className="flex items-center gap-4 justify-center text-2xl mb-6">
+                        <div className="text-lg text-slate-600 mb-4">Add 1 — can we factor this?</div>
+                        <div className="flex items-center gap-4 justify-center text-2xl mb-8">
                             <motion.span
                                 className="w-14 h-14 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold shadow-lg"
                             >
@@ -243,7 +218,23 @@ export const EuclidProofVisual = () => {
                                 {target}
                             </motion.span>
                         </div>
-                        <NumberLine highlightTarget />
+
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 1 }}
+                            className="flex flex-col items-center"
+                        >
+                            <TreeNode value={31} color="bg-gradient-to-br from-orange-400 to-orange-600" textColor="text-white" size="large" />
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ delay: 1.5 }}
+                                className="mt-4 text-lg text-slate-500"
+                            >
+                                Let's try to break it down...
+                            </motion.div>
+                        </motion.div>
                     </motion.div>
                 )}
 
@@ -253,104 +244,84 @@ export const EuclidProofVisual = () => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -20 }}
-                        className="text-center w-full"
+                        className="text-center"
                     >
-                        <div className="text-lg text-slate-600 mb-2">Watch each prime try to reach 31:</div>
-                        <div className="flex gap-6 justify-center mb-4">
-                            {primes.map((p) => (
-                                <div
-                                    key={p}
-                                    className={`flex items-center gap-2 px-3 py-1 rounded-full ${
-                                        currentPrime === p ? 'bg-slate-200' : ''
-                                    }`}
-                                >
-                                    <div className={`w-6 h-6 rounded-full text-white flex items-center justify-center text-sm font-bold ${
-                                        p === 2 ? 'bg-violet-500' : p === 3 ? 'bg-blue-500' : 'bg-orange-500'
-                                    }`}>
-                                        {p}
-                                    </div>
-                                    <span className="text-sm text-slate-600">jumps of {p}</span>
-                                </div>
-                            ))}
-                        </div>
+                        <div className="text-lg text-slate-600 mb-4">Trying to factor 31:</div>
 
-                        {/* Animated number line with jumps */}
-                        <div className="w-full overflow-x-auto pb-4">
-                            <div className="relative min-w-[600px] h-40">
-                                {/* Number line base */}
-                                <div className="absolute bottom-8 left-4 right-4 h-1 bg-slate-300 rounded-full" />
+                        <div className="flex flex-col items-center">
+                            <TreeNode value={31} color="bg-gradient-to-br from-orange-400 to-orange-600" textColor="text-white" size="large" />
 
-                                {/* All numbers with jump indicators */}
-                                <div className="absolute bottom-0 left-4 right-4">
-                                    {Array.from({ length: maxNum }, (_, i) => i + 1).map(num => {
-                                        const position = ((num - 1) / (maxNum - 1)) * 100;
-                                        const isTarget = num === target;
-                                        const isJumpLanding = jumpPositions.includes(num);
-                                        const showTick = num % 5 === 0 || num === 1 || num === 31;
+                            <motion.div
+                                initial={{ scaleY: 0 }}
+                                animate={{ scaleY: 1 }}
+                                className="w-0.5 h-10 bg-slate-300 origin-top mt-2"
+                            />
 
-                                        return (
-                                            <div
-                                                key={num}
-                                                className="absolute flex flex-col items-center"
-                                                style={{ left: `${position}%`, transform: 'translateX(-50%)' }}
+                            {/* Attempt branches */}
+                            <div className="flex gap-16 items-start">
+                                {primes.map((p, i) => (
+                                    <motion.div
+                                        key={p}
+                                        initial={{ opacity: 0, y: -10 }}
+                                        animate={{
+                                            opacity: currentAttempt >= i ? 1 : 0.3,
+                                            y: 0
+                                        }}
+                                        transition={{ delay: i * 0.1 }}
+                                        className="flex flex-col items-center"
+                                    >
+                                        <div className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold shadow-md text-white ${
+                                            p === 2 ? 'bg-violet-500' : p === 3 ? 'bg-blue-500' : 'bg-orange-500'
+                                        }`}>
+                                            {p}
+                                        </div>
+
+                                        {currentAttempt === i && (
+                                            <motion.div
+                                                initial={{ opacity: 0 }}
+                                                animate={{ opacity: 1 }}
+                                                className="mt-2 text-sm text-slate-500"
                                             >
-                                                {/* Jump landing marker */}
-                                                {isJumpLanding && (
-                                                    <motion.div
-                                                        initial={{ scale: 0, y: -30 }}
-                                                        animate={{ scale: 1, y: 0 }}
-                                                        className="absolute -top-14"
-                                                    >
-                                                        <div
-                                                            className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-md"
-                                                            style={{
-                                                                backgroundColor: currentPrime === 2 ? '#8b5cf6' : currentPrime === 3 ? '#3b82f6' : '#f97316'
-                                                            }}
-                                                        >
-                                                            ✓
-                                                        </div>
-                                                        <div
-                                                            className="w-0 h-0 border-l-4 border-r-4 border-t-6 border-transparent mx-auto"
-                                                            style={{
-                                                                borderTopColor: currentPrime === 2 ? '#8b5cf6' : currentPrime === 3 ? '#3b82f6' : '#f97316'
-                                                            }}
-                                                        />
-                                                    </motion.div>
-                                                )}
+                                                31 ÷ {p} = {(31 / p).toFixed(2)}...
+                                            </motion.div>
+                                        )}
 
-                                                {/* Target marker (31) */}
-                                                {isTarget && (
-                                                    <div className="absolute -top-20">
-                                                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white font-bold shadow-lg text-sm">
-                                                            31
-                                                        </div>
-                                                        <div className="text-xs text-orange-600 font-semibold mt-1 whitespace-nowrap">Target!</div>
-                                                    </div>
-                                                )}
+                                        {currentAttempt === i && showFailure && (
+                                            <motion.div
+                                                initial={{ scale: 0 }}
+                                                animate={{ scale: 1 }}
+                                                className="mt-2"
+                                            >
+                                                <div className="w-10 h-10 rounded-full bg-red-100 border-2 border-red-400 flex items-center justify-center">
+                                                    <span className="text-red-500 text-xl">✗</span>
+                                                </div>
+                                                <div className="text-xs text-red-500 mt-1">Not whole!</div>
+                                            </motion.div>
+                                        )}
 
-                                                {/* Tick mark */}
-                                                {showTick && (
-                                                    <>
-                                                        <div className={`w-0.5 ${isTarget ? 'h-5 bg-orange-500' : 'h-3 bg-slate-400'}`} />
-                                                        <span className={`text-xs mt-1 ${isTarget ? 'text-orange-600 font-bold' : 'text-slate-500'}`}>
-                                                            {num}
-                                                        </span>
-                                                    </>
-                                                )}
-                                            </div>
-                                        );
-                                    })}
-                                </div>
+                                        {currentAttempt > i && (
+                                            <motion.div
+                                                initial={{ scale: 0 }}
+                                                animate={{ scale: 1 }}
+                                                className="mt-2"
+                                            >
+                                                <div className="w-10 h-10 rounded-full bg-red-100 border-2 border-red-400 flex items-center justify-center">
+                                                    <span className="text-red-500 text-xl">✗</span>
+                                                </div>
+                                            </motion.div>
+                                        )}
+                                    </motion.div>
+                                ))}
                             </div>
                         </div>
 
                         <motion.div
                             initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
+                            animate={{ opacity: currentAttempt >= 2 && showFailure ? 1 : 0 }}
                             transition={{ delay: 0.5 }}
-                            className="text-slate-500 mt-2"
+                            className="mt-6 text-slate-600 font-medium"
                         >
-                            {currentPrime && `Jumping by ${currentPrime}s... never lands on 31!`}
+                            All branches lead to dead ends!
                         </motion.div>
                     </motion.div>
                 )}
@@ -363,34 +334,62 @@ export const EuclidProofVisual = () => {
                         exit={{ opacity: 0, y: -20 }}
                         className="text-center"
                     >
-                        <motion.div
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            transition={{ type: "spring", stiffness: 200 }}
-                            className="w-24 h-24 mx-auto rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 text-white flex items-center justify-center text-4xl font-bold shadow-xl mb-6"
-                        >
-                            31
-                        </motion.div>
+                        <div className="flex flex-col items-center mb-6">
+                            <motion.div
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                                transition={{ type: "spring", stiffness: 200 }}
+                            >
+                                <TreeNode value={31} color="bg-gradient-to-br from-emerald-400 to-emerald-600" textColor="text-white" size="large" highlight />
+                            </motion.div>
+
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ delay: 0.3 }}
+                                className="mt-4 flex items-center gap-2"
+                            >
+                                <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center">
+                                    <span className="text-emerald-600">1</span>
+                                </div>
+                                <span className="text-slate-400">×</span>
+                                <div className="w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold">
+                                    31
+                                </div>
+                            </motion.div>
+
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ delay: 0.5 }}
+                                className="mt-2 text-sm text-slate-500"
+                            >
+                                Only factors: 1 and itself
+                            </motion.div>
+                        </div>
+
                         <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
-                            transition={{ delay: 0.3 }}
+                            transition={{ delay: 0.7 }}
                             className="text-xl text-emerald-600 font-semibold mb-2"
                         >
-                            31 is unreachable — it's a new prime!
+                            31 is prime — unfactorable!
                         </motion.div>
+
                         <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
-                            transition={{ delay: 0.6 }}
+                            transition={{ delay: 1 }}
                             className="text-slate-500 max-w-sm mx-auto"
                         >
-                            No combination of jumps by 2, 3, or 5 can ever land exactly on 31. This means 31 must be prime — a new prime not in our original list!
+                            The factor tree has no branches. 31 is a new prime that wasn't in our original list — proving there are always more primes to discover!
                         </motion.div>
+
                         <motion.div
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 1 }}
+                            transition={{ delay: 1.3 }}
                             className="mt-6 text-4xl"
                         >
                             ∞
