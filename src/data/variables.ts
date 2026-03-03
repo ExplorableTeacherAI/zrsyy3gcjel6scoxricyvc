@@ -78,6 +78,19 @@ export interface VariableDefinition {
  */
 export const variableDefinitions: Record<string, VariableDefinition> = {
     // ========================================
+    // Euclid's Proof Scrollytelling
+    // ========================================
+    euclidStep: {
+        defaultValue: 0,
+        type: 'number',
+        label: 'Proof Step',
+        description: 'Current step in Euclid\'s proof visualization',
+        min: 0,
+        max: 4,
+        step: 1,
+    },
+
+    // ========================================
     // ADD YOUR VARIABLES HERE
     // ========================================
 

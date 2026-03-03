@@ -1,7 +1,8 @@
 import { type ReactElement } from "react";
 import { Block } from "@/components/templates";
-import { StackLayout } from "@/components/layouts";
-import { EditableH2, EditableParagraph, InlineTooltip } from "@/components/atoms";
+import { StackLayout, ScrollytellingLayout, ScrollStep, ScrollVisual } from "@/components/layouts";
+import { EditableH2, EditableH3, EditableParagraph, InlineTooltip } from "@/components/atoms";
+import { EuclidProofVisual } from "@/components/visuals/EuclidProofVisual";
 
 // Initialize variables and their colors from this file's variable definitions
 import { useVariableStore, initializeVariableColors } from "@/stores";
@@ -125,4 +126,71 @@ export const blocks: ReactElement[] = [
             </EditableParagraph>
         </Block>
     </StackLayout>,
+
+    <StackLayout key="layout-euclid-title" maxWidth="2xl">
+        <Block id="block-1772532256404" padding="md">
+            <EditableH3 id="h3-euclid-title" blockId="block-1772532256404">
+                Euclid's Proof: Infinitely Many Primes
+            </EditableH3>
+            <EditableParagraph id="para-euclid-intro" blockId="block-1772532256404">
+                Around 300 BCE, Euclid crafted one of the most elegant proofs in all of mathematics. He showed that no matter how many prime numbers you know, there must always be at least one more. Scroll through to see how the argument unfolds.
+            </EditableParagraph>
+        </Block>
+    </StackLayout>,
+
+    <ScrollytellingLayout key="layout-euclid-proof" varName="euclidStep" visualPosition="right" visualWidth="medium" gap="xl">
+        <ScrollStep>
+            <Block id="block-euclid-step-0" padding="sm">
+                <EditableParagraph id="para-euclid-step-0" blockId="block-euclid-step-0">
+                    <strong>Step 1: Start with any list of primes.</strong><br /><br />
+                    Suppose someone claims there are only finitely many primes. Let's say they give us a list: 2, 3, and 5. Euclid will show this list must be incomplete.
+                </EditableParagraph>
+            </Block>
+        </ScrollStep>
+
+        <ScrollStep>
+            <Block id="block-euclid-step-1" padding="sm">
+                <EditableParagraph id="para-euclid-step-1" blockId="block-euclid-step-1">
+                    <strong>Step 2: Multiply all the primes together.</strong><br /><br />
+                    Take every prime in our list and multiply them: 2 × 3 × 5 = 30. This product is divisible by every prime we know.
+                </EditableParagraph>
+            </Block>
+        </ScrollStep>
+
+        <ScrollStep>
+            <Block id="block-euclid-step-2" padding="sm">
+                <EditableParagraph id="para-euclid-step-2" blockId="block-euclid-step-2">
+                    <strong>Step 3: Add 1 to the product.</strong><br /><br />
+                    Here's the clever part: add 1 to get 31. This new number has a remarkable property — when you divide it by any prime in our list, you always get a remainder of 1.
+                </EditableParagraph>
+            </Block>
+        </ScrollStep>
+
+        <ScrollStep>
+            <Block id="block-euclid-step-3" padding="sm">
+                <EditableParagraph id="para-euclid-step-3" blockId="block-euclid-step-3">
+                    <strong>Step 4: Check divisibility.</strong><br /><br />
+                    31 ÷ 2 = 15.5 (not whole)<br />
+                    31 ÷ 3 = 10.33... (not whole)<br />
+                    31 ÷ 5 = 6.2 (not whole)<br /><br />
+                    None of our known primes divide 31 evenly!
+                </EditableParagraph>
+            </Block>
+        </ScrollStep>
+
+        <ScrollStep>
+            <Block id="block-euclid-step-4" padding="sm">
+                <EditableParagraph id="para-euclid-step-4" blockId="block-euclid-step-4">
+                    <strong>Step 5: The conclusion.</strong><br /><br />
+                    Since 31 isn't divisible by any prime in our list, either 31 itself is prime, or it has a prime factor we haven't discovered yet. Either way, our list was incomplete! This argument works no matter how long the original list is — proving there are infinitely many primes.
+                </EditableParagraph>
+            </Block>
+        </ScrollStep>
+
+        <ScrollVisual>
+            <Block id="block-euclid-viz" padding="none" hasVisualization>
+                <EuclidProofVisual />
+            </Block>
+        </ScrollVisual>
+    </ScrollytellingLayout>,
 ];
